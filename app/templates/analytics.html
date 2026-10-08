@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Section Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.8rem;">
+    <div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Model Analytics & Architecture</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+            Academic verification, Scikit-learn model evaluation metrics, and performance benchmarks.
+        </p>
+    </div>
+</div>
+
+<!-- Evaluation Metric Cards -->
+<div class="kpi-grid">
+    <div class="glass-panel kpi-card kpi-cyan">
+        <div class="kpi-info">
+            <h4>Classifier Model</h4>
+            <div class="kpi-value">RandomForest</div>
+            <div class="kpi-sub">Grade Prediction (O to F)</div>
+        </div>
+        <div class="kpi-icon">🌲</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-emerald">
+        <div class="kpi-info">
+            <h4>Classification Accuracy</h4>
+            <div class="kpi-value">67.1%</div>
+            <div class="kpi-sub">Stratified Test Split</div>
+        </div>
+        <div class="kpi-icon">🎯</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-amber">
+        <div class="kpi-info">
+            <h4>Regressor Model</h4>
+            <div class="kpi-value">GradientBoost</div>
+            <div class="kpi-sub">Continuous GPA Regression</div>
+        </div>
+        <div class="kpi-icon">⚡</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-emerald">
+        <div class="kpi-info">
+            <h4>Regression R² Score</h4>
+            <div class="kpi-value">0.882</div>
+            <div class="kpi-sub">RMSE: 0.779 GPA Units</div>
+        </div>
+        <div class="kpi-icon">📊</div>
+    </div>
+</div>
+
+<!-- Static Visualization from Matplotlib -->
+<div class="glass-panel" style="padding: 1.75rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div>
+            <h3 style="font-size: 1.15rem;">Matplotlib Feature Importance & Regression Analysis</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Rendered directly via Python's <code>matplotlib.pyplot</code> and saved to static assets</p>
+        </div>
+        <span class="badge" style="background: rgba(99, 102, 241, 0.2); color: #a5b4fc;">matplotlib 3.11</span>
+    </div>
+
+    <div style="text-align: center; background: rgba(0,0,0,0.25); padding: 1rem; border-radius: var(--radius-sm);">
+        <img src="{{ url_for('static', filename='img/model_performance.png') }}" alt="Model Evaluation Plot" style="max-width: 100%; height: auto; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+    </div>
+</div>
+{% endblock %}

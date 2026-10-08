@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Section Header -->
+<div
+    style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.8rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Student Academic Database</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+            Direct SQLite database connectivity performing full CRUD operations, regex filtering, and CSV data export.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('students.export_csv') }}" class="btn btn-secondary">
+            <span>📥 Export to CSV</span>
+        </a>
+        <a href="{{ url_for('students.add_student') }}" class="btn btn-primary">
+            <span>+ Add New Student</span>
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filter Bar -->
+<div class="glass-panel" style="padding: 1.25rem; margin-bottom: 1.5rem;">
+    <form method="GET" action="{{ url_for('students.list_students') }}"
+        style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 250px;">
+            <input type="text" name="search" class="form-input" placeholder="Search by Student ID, Name, or Email..."
+                value="{{ search }}">
+        </div>
+
+        <div style="min-width: 180px;">
+            <select name="risk" class="form-select" onchange="this.form.submit()">
+                <option value="ALL" {% if selected_risk=='ALL' %}selected{% endif %}>All Risk Levels</option>
+                <option value="Low Risk" {% if selected_risk=='Low Risk' %}selected{% endif %}>Low Risk</option>
+                <option value="Moderate Risk" {% if selected_risk=='Moderate Risk' %}selected{% endif %}>Moderate Risk
+                </option>
+                <option value="High Risk" {% if selected_risk=='High Risk' %}selected{% endif %}>High Risk</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-secondary">Filter</button>
+        {% if search or (selected_risk and selected_risk != 'ALL') %}
+        <a href="{{ url_for('students.list_students') }}" class="btn btn-secondary"
+            style="color: var(--accent-rose);">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Students Records Table -->
+<div class="glass-panel" style="padding: 1.5rem;">
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Dept / Sem</th>
+                    <th>Attendance</th>
+                    <th>Study Hrs</th>
+                    <th>Scores (Mid/Assign/Lab)</th>
+                    <th>Predicted Grade</th>
+                    <th>GPA</th>
+                    <th>Risk Tier</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td><code>{{ s.student_id }}</code></td>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td style="color: var(--text-secondary); font-size: 0.8rem;">{{ s.email }}</td>
+                    <td>{{ s.department }} (Sem {{ s.semester }})</td>
+                    <td>
+                        <span
+                            style="{% if s.attendance < 75 %}color: var(--accent-rose); font-weight: bold;{% else %}color: var(--accent-emerald);{% endif %}">
+                            {{ s.attendance }}%
+                        </span>
+                    </td>
+                    <td>{{ s.study_hours_weekly }} hrs/wk</td>
+                    <td>{{ s.midterm_score }} | {{ s.assignment_score }} | {{ s.lab_score }}</td>
+                    <td><span class="badge-grade">{{ s.predicted_grade }}</span></td>
+                    <td><strong>{{ "%.2f"|format(s.predicted_gpa) }}</strong></td>
+                    <td>
+                        <span
+                            class="badge {% if s.risk_level == 'Low Risk' %}badge-low-risk{% elif s.risk_level == 'Moderate Risk' %}badge-moderate-risk{% else %}badge-high-risk{% endif %}">
+                            {{ s.risk_level }}
+                        </span>
+                    </td>
+                    <td style="text-align: right; white-space: nowrap;">
+                        <a href="{{ url_for('students.edit_student', student_id=s.student_id) }}"
+                            class="btn btn-secondary btn-sm" title="Edit Student">
+                            Edit
+                        </a>
+                        <form method="POST" action="{{ url_for('students.delete_student', student_id=s.student_id) }}"
+                            style="display: inline-block;"
+                            onsubmit="return confirm('Are you sure you want to delete student {{ s.student_id }}?');">
+                            <button type="submit" class="btn btn-danger btn-sm" title="Delete Record">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="11" style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                        No student records found matching the query.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

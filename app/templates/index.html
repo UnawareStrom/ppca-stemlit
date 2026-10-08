@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.8rem;">
+    <div>
+        <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Academic Intelligence & Performance Hub</h1>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+            Real-time cohort monitoring, early risk detection, and predictive learning analytics.
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('main.predictor_view') }}" class="btn btn-primary">
+            <span>⚡ Test Live AI Predictor</span>
+        </a>
+        <a href="{{ url_for('students.add_student') }}" class="btn btn-secondary">
+            <span>+ Enroll Student</span>
+        </a>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-grid">
+    <div class="glass-panel kpi-card kpi-cyan">
+        <div class="kpi-info">
+            <h4>Total Students</h4>
+            <div class="kpi-value">{{ metrics.total_students }}</div>
+            <div class="kpi-sub">Registered in AIML Cohort</div>
+        </div>
+        <div class="kpi-icon">🎓</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-emerald">
+        <div class="kpi-info">
+            <h4>Predicted Pass Rate</h4>
+            <div class="kpi-value">{{ metrics.pass_rate }}%</div>
+            <div class="kpi-sub">Predicted to Clear Semester</div>
+        </div>
+        <div class="kpi-icon">📈</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-amber">
+        <div class="kpi-info">
+            <h4>Average GPA</h4>
+            <div class="kpi-value">{{ metrics.avg_gpa }}</div>
+            <div class="kpi-sub">Out of 10.0 Scale</div>
+        </div>
+        <div class="kpi-icon">⭐</div>
+    </div>
+
+    <div class="glass-panel kpi-card kpi-rose">
+        <div class="kpi-info">
+            <h4>At-Risk Students</h4>
+            <div class="kpi-value">{{ metrics.high_risk_count }}</div>
+            <div class="kpi-sub">Needs Immediate Mentorship</div>
+        </div>
+        <div class="kpi-icon">⚠️</div>
+    </div>
+</div>
+
+<!-- Visual Analytics Grid -->
+<div class="grid-2col">
+    <!-- Grade Distribution -->
+    <div class="glass-panel chart-card">
+        <div class="chart-header">
+            <div>
+                <h3 class="chart-title">Cohort Grade Projections</h3>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">University of Mumbai 10-Point Scale</span>
+            </div>
+            <span class="chart-badge">Ensemble Model</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="gradeChart" 
+                data-labels='{{ metrics.grade_distribution.keys() | list | tojson }}'
+                data-counts='{{ metrics.grade_distribution.values() | list | tojson }}'>
+            </canvas>
+        </div>
+    </div>
+
+    <!-- Risk Level Distribution -->
+    <div class="glass-panel chart-card">
+        <div class="chart-header">
+            <div>
+                <h3 class="chart-title">Academic Risk Stratification</h3>
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">Based on Attendance & Continuous Assessment</span>
+            </div>
+            <span class="chart-badge">Early Warning</span>
+        </div>
+        <div class="chart-wrapper">
+            <canvas id="riskChart"
+                data-labels='{{ metrics.risk_distribution.keys() | list | tojson }}'
+                data-counts='{{ metrics.risk_distribution.values() | list | tojson }}'>
+            </canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Records Table -->
+<div class="glass-panel" style="padding: 1.5rem; margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <div>
+            <h3 style="font-size: 1.15rem; font-weight: 700;">Recently Evaluated Students</h3>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Latest entries in the SQLite database</p>
+        </div>
+        <a href="{{ url_for('students.list_students') }}" class="btn btn-secondary btn-sm">
+            View All {{ metrics.total_students }} Records &rarr;
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Attendance</th>
+                    <th>Study Hrs/Wk</th>
+                    <th>Midterm</th>
+                    <th>Predicted Grade</th>
+                    <th>Predicted GPA</th>
+                    <th>Risk Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in metrics.recent_students %}
+                <tr>
+                    <td><code>{{ s.student_id }}</code></td>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td>{{ s.attendance }}%</td>
+                    <td>{{ s.study_hours_weekly }} hrs</td>
+                    <td>{{ s.midterm_score }}/100</td>
+                    <td><span class="badge-grade">{{ s.predicted_grade }}</span></td>
+                    <td><strong>{{ "%.2f"|format(s.predicted_gpa) }}</strong></td>
+                    <td>
+                        <span class="badge {% if s.risk_level == 'Low Risk' %}badge-low-risk{% elif s.risk_level == 'Moderate Risk' %}badge-moderate-risk{% else %}badge-high-risk{% endif %}">
+                            {{ s.risk_level }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('students.edit_student', student_id=s.student_id) }}" class="btn btn-secondary btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                        No student records found in database. Click "Enroll Student" to create one.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

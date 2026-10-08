@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default("EduPulse AI - Student Analytics & Recommendation System") }} | TCET AIML</title>
+    <meta name="description" content="AI-driven academic performance analytics, risk prediction, and career recommendation system for engineering students.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom Glassmorphism Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar">
+        <a href="{{ url_for('main.dashboard') }}" class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-primary);">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+            <span>EduPulse <span style="color: var(--accent-secondary);">AI</span></span>
+            <span class="brand-badge">TCET AIML</span>
+        </a>
+
+        <ul class="nav-links">
+            <li>
+                <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.predictor_view') }}" class="nav-link {% if active_page == 'predictor' %}active{% endif %}">
+                    AI Predictor
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('students.list_students') }}" class="nav-link {% if active_page == 'students' %}active{% endif %}">
+                    Student Records (CRUD)
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('main.analytics_view') }}" class="nav-link {% if active_page == 'analytics' %}active{% endif %}">
+                    Model Analytics
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-status">
+            <span class="status-dot"></span>
+            <span>AI Ensemble Online</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="app-container">
+
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div>
+            <strong>TCET Autonomous</strong> • Dept of Artificial Intelligence & Machine Learning (University of Mumbai)
+        </div>
+        <div>
+            Course: <code>ESC-AIML301 (Python Programming)</code> • Powered by <strong>Python 3.14 & Scikit-learn</strong>
+        </div>
+    </footer>
+
+    <!-- Client Script -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

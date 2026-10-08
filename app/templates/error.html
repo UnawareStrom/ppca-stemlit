@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 4rem auto; text-align: center;">
+    <div class="glass-panel" style="padding: 3rem 2rem;">
+        <div style="font-size: 3.5rem; margin-bottom: 1rem;">⚠️</div>
+        <h1 style="font-size: 1.6rem; margin-bottom: 0.75rem;">{{ title|default("Notice") }}</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">
+            {{ error.message|default("An unexpected condition occurred while processing your request.") }}
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem;">
+            <a href="javascript:history.back()" class="btn btn-secondary">&larr; Go Back</a>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Return to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 950px; margin: 0 auto;">
+    <!-- Page Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.8rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 1.85rem; margin-bottom: 0.35rem;">Adaptive CSV Ingestion Engine</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                Schema-agnostic bulk student ingestion with automated header mapping, data sanitization, AI grade inference, and adaptive model retraining.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="{{ url_for('students.sample_csv') }}" class="btn btn-secondary">
+                <span>📄 Download Sample Template</span>
+            </a>
+            <a href="{{ url_for('students.list_students') }}" class="btn btn-secondary">
+                <span>&larr; Back to Directory</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Ingestion Panel -->
+    <div class="glass-panel" style="padding: 2rem; margin-bottom: 2rem;">
+        <form method="POST" enctype="multipart/form-data" id="csv-upload-form">
+            <!-- File Dropzone -->
+            <div id="dropzone" style="border: 2px dashed rgba(99, 102, 241, 0.4); border-radius: 12px; padding: 2.5rem; text-align: center; background: rgba(15, 23, 42, 0.4); cursor: pointer; transition: all 0.2s ease; margin-bottom: 1.75rem;">
+                <input type="file" id="csv_file" name="csv_file" accept=".csv" required style="display: none;">
+                <div style="font-size: 3rem; margin-bottom: 0.75rem;">📂</div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-primary);">
+                    Drag and drop your CSV file here, or <span style="color: var(--accent-primary); text-decoration: underline;">browse</span>
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 0.5rem;">
+                    Accepts any CSV with student scores or attendance in any column order.
+                </p>
+                <div id="file-info" style="display: none; margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(99, 102, 241, 0.15); border-radius: 8px; border: 1px solid rgba(99, 102, 241, 0.3); font-family: monospace; color: var(--accent-secondary);"></div>
+            </div>
+
+            <!-- Adaptive Ingestion Options -->
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border-glass); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.75rem;">
+                <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⚙️ Adaptive Ingestion Settings</span>
+                </h4>
+
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; user-select: none;">
+                    <input type="checkbox" name="adapt_model" value="true" checked style="margin-top: 0.25rem; accent-color: var(--accent-primary); width: 1.1rem; height: 1.1rem;">
+                    <div>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">Adapt ML Model on Ingested Cohort (Cohort Learning)</strong>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.2rem; margin-bottom: 0;">
+                            When enabled, the Random Forest classifier and Gradient Boosting regressor automatically retrain on the accumulated database records, adapting model weights to current semester trends.
+                        </p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                <a href="{{ url_for('students.list_students') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⚡ Ingest & Process Cohort</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Adaptive Mapping Reference Matrix -->
+    <div class="glass-panel" style="padding: 1.75rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">
+            🧠 Supported Column Aliases & Fuzzy Matching
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
+            EduPulse AI's adaptive engine normalizes punctuation, symbols, whitespace, and case to automatically recognize typical college columns:
+        </p>
+
+        <div class="table-responsive">
+            <table style="font-size: 0.88rem;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Target Attribute</th>
+                        <th style="width: 45%;">Recognized Header Variations</th>
+                        <th style="width: 30%;">Adaptive Fallback Strategy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Student ID</strong></td>
+                        <td><code>Roll No</code>, <code>Roll</code>, <code>PRN</code>, <code>UID</code>, <code>Seat No</code>, <code>Student ID</code></td>
+                        <td>Auto-generates standardized <code>TCET-AIML-XXXX</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Student Name</strong></td>
+                        <td><code>Name</code>, <code>Student Name</code>, <code>Full Name</code>, <code>Candidate</code></td>
+                        <td>Defaults to <code>Student &lt;ID&gt;</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Email</strong></td>
+                        <td><code>Email</code>, <code>Email Address</code>, <code>Mail</code>, <code>Email ID</code></td>
+                        <td>Auto-creates <code>&lt;slug&gt;@tcetmumbai.in</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Attendance</strong></td>
+                        <td><code>Attendance</code>, <code>Attendance %</code>, <code>Attnd</code>, <code>Present (%)</code></td>
+                        <td>Cleans <code>%</code> signs, defaults to 75.0% baseline</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Midterm Exam</strong></td>
+                        <td><code>Midterm Score</code>, <code>Mid-Term</code>, <code>ISE</code>, <code>IA1</code>, <code>Theory</code>, <code>Exam</code></td>
+                        <td>Bounds to [0, 100], defaults to 65.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Assignment</strong></td>
+                        <td><code>Assignment Score</code>, <code>Assignments</code>, <code>IA2</code>, <code>Quiz</code></td>
+                        <td>Bounds to [0, 100], defaults to 70.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Practical / Lab</strong></td>
+                        <td><code>Lab Score</code>, <code>Lab</code>, <code>Practical</code>, <code>TW</code>, <code>Term Work</code></td>
+                        <td>Bounds to [0, 100], defaults to 75.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Study Hours</strong></td>
+                        <td><code>Study Hours</code>, <code>Weekly Study Hours</code>, <code>Study Time</code>, <code>Hours</code></td>
+                        <td>Bounds to [0, 70], defaults to 12.0 hrs/wk</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('csv_file');
+    const fileInfo = document.getElementById('file-info');
+    const submitBtn = document.getElementById('submit-btn');
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'var(--accent-primary)';
+        dropzone.style.background = 'rgba(99, 102, 241, 0.1)';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+        dropzone.style.background = 'rgba(15, 23, 42, 0.4)';
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+        dropzone.style.background = 'rgba(15, 23, 42, 0.4)';
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileInfo();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileInfo);
+
+    function updateFileInfo() {
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            fileInfo.style.display = 'block';
+            fileInfo.innerHTML = `<strong>Selected:</strong> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        }
+    }
+
+    document.getElementById('csv-upload-form').addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>⏳ Ingesting & Running AI...</span>';
+    });
+</script>
+{% endblock %}
